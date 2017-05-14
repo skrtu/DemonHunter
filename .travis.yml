@@ -7,4 +7,4 @@ install:
   - pip install .
   - pip install -r requirements.txt
   
-script: "./examples/honeypot/ssl_honeypot.py"
+script: "./skrtu/DemonHunter/examples/honeypot/ssl_honeypot.py"
