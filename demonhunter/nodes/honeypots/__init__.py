@@ -56,7 +56,7 @@ class Agent():
         if self.certificate is not None:
             assert os.path.exists(self.certificate)
             self.sc = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=self.certificate)
-        print("Connecting to AgentManager at: {}:{}".format(self.target, self.port))
+        print("Connecting to AgentManager at {}".format(self.port))
 
     # TODO: Secure the transport ssl/or something.
     def send_data(self, data):
