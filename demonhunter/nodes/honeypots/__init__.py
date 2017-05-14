@@ -1,5 +1,7 @@
 import asyncio
 import json
+import ssl
+import os
 
 
 class BaseHandler:
@@ -43,28 +45,34 @@ class BaseHoneypot:
 
 
 class Agent():
-
-    port = 16742
-
-    def __init__(self, target, honeypots, loop, agent_password=None):
+    def __init__(self, target, honeypots, loop, certificate, port, agent_password=None):
         self.loop = loop
         self.targets = target
         for honeypot in honeypots:
             honeypot.agents.append(self)
         self.agent_password = None if not agent_password else agent_password.encode()
+        self.port = port
+        self.certificate = certificate
+        if self.certificate is not None:
+            assert os.path.exists(self.certificate)
+            self.sc = ssl.create_default_context(ssl.Purpose.SERVER_AUTH, cafile=self.certificate)
 
     # TODO: Secure the transport ssl/or something.
     def send_data(self, data):
         data = json.dumps(data)
         for target in self.targets:
-            # i guess its not a good way :/
-            coro = self.loop.create_connection(lambda: AgentProtocol(data, self.agent_password),
-                                               target, 16742)
-            self.loop.call_soon_threadsafe(asyncio.async, coro)
+            # if the certificate is present we send via ssl if not, we go the old way
+            if self.certificate is None:
+                coro = self.loop.create_connection(lambda: AgentProtocol(data, self.agent_password),
+                                               target, self.port)
+                self.loop.call_soon_threadsafe(asyncio.async, coro)
+            else:
+                coro = self.loop.create_connection(lambda: AgentProtocol(data, self.agent_password),
+                                               target, self.port, ssl=self.sc)
+                self.loop.call_soon_threadsafe(asyncio.async, coro)
 
 
 class AgentProtocol(asyncio.Protocol):
-
     state = 0
 
     def __init__(self, message, agent_password):
