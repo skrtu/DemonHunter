@@ -1,7 +1,13 @@
 import asyncio
 import json
+<<<<<<< HEAD
 import ssl
 import os
+=======
+import logging
+
+from demonhunter.core.loggers.logfile import FileLogger
+>>>>>>> RevengeComing/master
 
 
 class BaseHandler:
@@ -18,29 +24,33 @@ class BaseHandler:
         for agent in self.honeypot.agents:
             agent.send_data(data)
 
-    def save_in_sqlite(data):
+    def save_in_sqlite(self, data):
         pass
 
-    def save_logfile(data):
-        pass
+    def save_logfile(self, data):
+        self.honeypot.file_logger.log(data)
 
 
-class BaseHoneypot:
+class BaseHoneypot(object):
     
     active_attacks = 0
 
-    def __init__(self, logfile=False, sqlite=False, interfaces=['0.0.0.0'], agents=[]):
+    def __init__(self, logfile=None, sqlite=None, interfaces=['0.0.0.0'], agents=None):
         self.logfile = logfile
         self.sqlite = sqlite
         self.interfaces = interfaces
-        self.agents = agents
+
+        if self.logfile:
+            self.file_logger = FileLogger(self.logfile)
+
+        if not agents:
+            self.agents = []
 
     def create_server(self, loop):
-        print(self)
         coro = loop.create_server(lambda: self.handler(self), self.interfaces, self.port)
         server = loop.run_until_complete(coro)
         for socket in server.sockets:
-            print('Serving on {0}'.format(socket.getsockname()))
+            logging.info('Serving on {0}'.format(socket.getsockname()))
         return server
 
 
@@ -90,7 +100,7 @@ class AgentProtocol(asyncio.Protocol):
             if self.agent_password:
                 self.transport.write(self.agent_password)
             else:
-                print("AgentManager Asks for password !!!??? did you forget to set a password ?")
+                logging.warning("AgentManager Asks for password !? did you forget to set a password ?")
                 self.transport.close()
 
     def send_data(self):
