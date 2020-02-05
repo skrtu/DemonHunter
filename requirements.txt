@@ -1,7 +1,7 @@
 <<<<<<< HEAD
-httptools
+httptools==0.1.0
 aiohttp
 flask
 =======
-httptools
+httptools==0.1.0
 >>>>>>> RevengeComing/master
