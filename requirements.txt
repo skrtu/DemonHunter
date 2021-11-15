@@ -1,6 +1,6 @@
 <<<<<<< HEAD
 httptools
-aiohttp
+aiohttp==3.8.1
 flask
 =======
 httptools
