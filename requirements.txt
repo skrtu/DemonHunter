@@ -1,7 +1,7 @@
 <<<<<<< HEAD
 httptools
 aiohttp
-flask
+flask==2.3.3
 =======
 httptools
 >>>>>>> RevengeComing/master
